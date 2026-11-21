@@ -1,0 +1,88 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net: default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isResearcher() {
+      return isSignedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'wyammhmd1@gmail.com';
+    }
+
+    function isValidTrialResponse(data, responseId) {
+      return data.keys().hasAll([
+          'id',
+          'sessionId',
+          'participantCode',
+          'word',
+          'category',
+          'answer',
+          'timestamp',
+          'createdAt'
+        ])
+        && data.keys().hasOnly([
+          'id',
+          'sessionId',
+          'participantCode',
+          'word',
+          'category',
+          'answer',
+          'timestamp',
+          'reactionTimeMs',
+          'createdAt'
+        ])
+        && isValidId(data.id)
+        && data.id == responseId
+        && isValidId(data.sessionId)
+        && data.participantCode is string
+        && data.participantCode.size() >= 1
+        && data.participantCode.size() <= 64
+        && data.word is string
+        && data.word.size() >= 1
+        && data.word.size() <= 64
+        && data.category is string
+        && data.category in [
+          'Real English Words',
+          'Harry Potter Coined Words',
+          'Plausible Nonwords'
+        ]
+        && data.answer is string
+        && data.answer in ['Yes', 'No']
+        && data.timestamp is string
+        && data.timestamp.size() >= 1
+        && data.timestamp.size() <= 64
+        && (!('reactionTimeMs' in data) || (data.reactionTimeMs is number && data.reactionTimeMs >= 0 && data.reactionTimeMs <= 3600000))
+        && data.createdAt == request.time;
+    }
+
+    match /trial_responses/{responseId} {
+      // Only the verified researcher can read individual or listed responses
+      allow get: if isValidId(responseId) && isResearcher();
+      allow list: if isResearcher();
+
+      // Participants submit anonymous, strictly schema-validated immutable trial records
+      allow create: if isValidId(responseId) && isValidTrialResponse(incoming(), responseId);
+
+      // Responses are immutable once recorded
+      allow update: if false;
+
+      // Only the verified researcher can reset/delete study records
+      allow delete: if isValidId(responseId) && isResearcher();
+    }
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "entities": {
+    "TrialResponse": {
+      "title": "TrialResponse",
+      "description": "A single lexical decision trial response submitted by a participant.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique trial response document identifier",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "sessionId": {
+          "type": "string",
+          "description": "Unique experiment session identifier",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "participantCode": {
+          "type": "string",
+          "description": "Participant identifier or auto-generated code",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "word": {
+          "type": "string",
+          "description": "Stimulus word shown during the trial",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "category": {
+          "type": "string",
+          "description": "Lexical category of the stimulus word",
+          "enum": [
+            "Real English Words",
+            "Harry Potter Coined Words",
+            "Plausible Nonwords"
+          ]
+        },
+        "answer": {
+          "type": "string",
+          "description": "Participant lexical decision answer",
+          "enum": ["Yes", "No"]
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO-8601 client timestamp of the trial submission",
+          "maxLength": 64
+        },
+        "reactionTimeMs": {
+          "type": "number",
+          "description": "Response latency in milliseconds"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server-assigned creation timestamp"
+        }
+      },
+      "required": [
+        "id",
+        "sessionId",
+        "participantCode",
+        "word",
+        "category",
+        "answer",
+        "timestamp",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/trial_responses/{responseId}": {
+      "schema": {
+        "$ref": "#/entities/TrialResponse"
+      },
+      "description": "Immutable lexical decision trial responses submitted anonymously by participants and read/managed exclusively by the verified researcher."
+    }
+  }
+}

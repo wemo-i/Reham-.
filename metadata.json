@@ -1,0 +1,6 @@
+{
+  "name": "Lexical Decision Psychology Lab",
+  "description": "A clean web application for conducting a 24-word lexical decision psychological experiment across Real English Words, Harry Potter Coined Words, and Plausible Nonwords, with aggregated researcher analytics and CSV export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
