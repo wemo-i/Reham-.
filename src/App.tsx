@@ -293,7 +293,8 @@ export default function App() {
       window.location.pathname.endsWith('/admin') ||
       window.location.hash === '#results'
     ) {
-      window.history.replaceState({}, '', import.meta.env.BASE_URL || '/');
+      const resetPath = new URL(import.meta.env.BASE_URL || '/', window.location.href).pathname;
+      window.history.replaceState({}, '', resetPath);
     }
   };
 

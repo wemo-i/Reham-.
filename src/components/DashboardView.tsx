@@ -54,12 +54,12 @@ export function DashboardView({
   const [copiedType, setCopiedType] = useState<'student' | 'researcher' | null>(null);
 
   const handleCopyLink = async (type: 'student' | 'researcher') => {
-    const origin = window.location.origin;
-    const base = import.meta.env.BASE_URL || '/';
-    const normalizedBase = base.endsWith('/') ? base : `${base}/`;
-    const studentUrl = `${origin}${normalizedBase}`;
+    const resolvedBase = new URL(import.meta.env.BASE_URL || '/', window.location.href);
+    const studentUrl = resolvedBase.href;
     const researcherUrl =
-      normalizedBase === '/' ? `${origin}/results` : `${origin}${normalizedBase}#results`;
+      resolvedBase.pathname === '/'
+        ? `${resolvedBase.origin}/results`
+        : `${studentUrl}#results`;
     const url = type === 'student' ? studentUrl : researcherUrl;
     try {
       await navigator.clipboard.writeText(url);
